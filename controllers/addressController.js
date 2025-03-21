@@ -2,16 +2,26 @@ const { Address, generateCustomObjectId } = require("../models/addressModel");
 
 const addAddress = async (req, res) => {
     try {
-        const { psid, fullName, phone, address, city, state, zipCode, sessionTime } = req.body;
+        const { psid, fullName, phone, address, city, state, zipCode, sessionTimestamp } = req.body;
 
-        const _id = generateCustomObjectId(psid, sessionTime); // Tạo `_id`
+        const _id = generateCustomObjectId(psid, sessionTimestamp); // Tạo `_id`
 
         // Kiểm tra nếu `_id` đã tồn tại
         let existingRecord = await Address.findOne({ _id });
         if (existingRecord) {
-            return res.status(409).json({ message: "Dữ liệu đã tồn tại!", data: existingRecord });
+            // Cập nhật dữ liệu ngoại trừ `psid` và `sessionTimestamp`
+            existingRecord.fullName = fullName;
+            existingRecord.phone = phone;
+            existingRecord.address = address;
+            existingRecord.city = city;
+            existingRecord.state = state;
+            existingRecord.zipCode = zipCode;
+
+            await existingRecord.save();
+            return res.status(200).json({ message: "Dữ liệu đã được cập nhật!", data: existingRecord });
         }
 
+        // Nếu không tồn tại thì thêm mới
         const newAddress = new Address({
             _id,
             psid,
@@ -21,7 +31,7 @@ const addAddress = async (req, res) => {
             city,
             state,
             zipCode,
-            sessionTime
+            sessionTimestamp
         });
 
         await newAddress.save();
@@ -30,6 +40,7 @@ const addAddress = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const getAddressById = async (req, res) => {
     try {
