@@ -18,7 +18,7 @@ const addressSchema = new mongoose.Schema({
     city: { type: String, required: true },
     state: { type: String, required: true },
     zipCode: { type: String, required: true },
-    sessionTimestampstamp: { type: Number, required: true } // Unix timestamp
+    sessionTimestamp: { type: Number, required: true } // Unix timestamp
 }, { versionKey: false });
 
 const Address = mongoose.model("Address", addressSchema);
