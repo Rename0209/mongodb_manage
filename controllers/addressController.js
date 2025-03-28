@@ -1,8 +1,16 @@
-const { Address, generateCustomObjectId } = require("../models/addressModel");
+const { Address } = require("../models/addressModel");
+const { generateCustomObjectId } = require("../utils/genegrateId");
+const { decryptAES } = require("../utils/encryption");
 
 const addAddress = async (req, res) => {
     try {
-        const { psid, fullName, phone, address, city, state, zipCode, sessionTimestamp } = req.body;
+        const { token, fullName, phone, address, city, state, zipCode, sessionTimestamp } = req.body;
+
+        // Giải mã token để lấy `psid`
+        const psid = decryptAES(token);
+        if (!psid) {
+            return res.status(400).json({ message: "Token không hợp lệ!" });
+        }
 
         const _id = generateCustomObjectId(psid, sessionTimestamp); // Tạo `_id`
 
@@ -44,9 +52,14 @@ const addAddress = async (req, res) => {
 
 const getAddressById = async (req, res) => {
     try {
-        const { psid, timestamp } = req.params; // Nhận psid và timestamp từ URL
-        if (!psid || !timestamp) {
-            return res.status(400).json({ message: "Thiếu psid hoặc timestamp!" });
+        const { token, timestamp } = req.params; // Nhận psid và timestamp từ URL
+        if (!token || !timestamp) {
+            return res.status(400).json({ message: "Thiếu token hoặc timestamp!" });
+        }
+
+        const psid = decryptAES(token);
+        if (!psid) {
+            return res.status(400).json({ message: "Token không hợp lệ!" });
         }
 
         const id = generateCustomObjectId(psid, parseInt(timestamp)); // Tạo _id từ psid & timestamp
