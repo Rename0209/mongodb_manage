@@ -8,8 +8,18 @@ const addressRoutes = require("./routes/addressRoute");
 connectDB();
 
 const app = express();
+
+// CORS Configuration
+const corsOptions = {
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400 // 24 hours
+};
+
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Sử dụng routes
 app.use("/api", addressRoutes);
