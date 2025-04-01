@@ -12,7 +12,7 @@ const addAddress = async (req, res) => {
             return res.status(400).json({ message: "Token không hợp lệ!" });
         }
 
-        const _id = generateCustomObjectId(psid, sessionTimestamp); // Tạo `_id`
+        const _id = generateCustomObjectId(psid); // Tạo `_id` chỉ từ psid
 
         // Kiểm tra nếu `_id` đã tồn tại
         let existingRecord = await Address.findOne({ _id });
@@ -24,6 +24,7 @@ const addAddress = async (req, res) => {
             existingRecord.city = city;
             existingRecord.state = state;
             existingRecord.zipCode = zipCode;
+            existingRecord.sessionTimestamp = sessionTimestamp;
 
             await existingRecord.save();
             return res.status(200).json({ message: "Dữ liệu đã được cập nhật!", data: existingRecord });
@@ -49,12 +50,11 @@ const addAddress = async (req, res) => {
     }
 };
 
-
 const getAddressById = async (req, res) => {
     try {
-        const { token, timestamp } = req.params; // Nhận psid và timestamp từ URL
-        if (!token || !timestamp) {
-            return res.status(400).json({ message: "Thiếu token hoặc timestamp!" });
+        const { token } = req.params; // Chỉ nhận token từ URL
+        if (!token) {
+            return res.status(400).json({ message: "Thiếu token!" });
         }
 
         const psid = decryptAES(token);
@@ -62,7 +62,7 @@ const getAddressById = async (req, res) => {
             return res.status(400).json({ message: "Token không hợp lệ!" });
         }
 
-        const id = generateCustomObjectId(psid, parseInt(timestamp)); // Tạo _id từ psid & timestamp
+        const id = generateCustomObjectId(psid); // Tạo _id chỉ từ psid
         const address = await Address.findOne({ _id: id }); // Tìm trong MongoDB
 
         if (!address) {
